@@ -26,19 +26,19 @@ data class UserPreferences(
     val userRankTitle: String = "WaveMind Master",
     val language: String = "English (US)",
 
-    // Theme Engine Presets
-    val themePreset: String = "Cyber Void Dark",
+    // Theme Engine Presets (Default matched to user specification)
+    val themePreset: String = "Deep Ocean Azure",
     val glassOpacity: Float = 85f, // 0% to 100%
     val glassBlurIntensity: Float = 70f, // 0% to 100%
-    val cardCornerRadius: Float = 18f, // 0dp to 28dp
-    val primaryColor: String = "#00F0FF",
+    val cardCornerRadius: Float = 16f, // 0dp to 28dp
+    val primaryColor: String = "#00E5FF",
     val cardGlowColor: String = "#00FF88",
     val backgroundGrid: Boolean = true,
     val gridLineIntensity: Float = 16f,
     val scanlineCrtEffect: Boolean = false,
 
-    // UI Scale / App DP Multiplier (1% to 500%)
-    val uiScalePercent: Float = 100f, // 1% to 500% dp scaling
+    // UI Scale / App DP Multiplier (Default 85% as requested by user)
+    val uiScalePercent: Float = 85f, // 70% to 200% dp scaling
     val fontScalePercent: Float = 100f, // 50% to 200% font size scaling
     val cardSizeScalePercent: Float = 100f, // 60% to 200% card size scaling
     val appFontFamily: String = "Sans-Serif Standard", // 30+ font choices
@@ -120,15 +120,15 @@ data class UserPreferences(
     val showFpsCard: Boolean = true,
     val showTypographyCard: Boolean = true,
 
-    // Edge Bar Customization
-    val edgeBarColor: String = "#00F0FF",
-    val edgeBarHeight: Float = 62f,
-    val edgeBarCornerRadius: Float = 28f,
-    val edgeBarBottomOffset: Float = 10f,
-    val edgeBarHorizontalMargin: Float = 16f,
-    val edgeBarGlassOpacity: Float = 90f,
-    val edgeBarAutoHideOnScroll: Boolean = true,
-    val topBarAutoHideOnScroll: Boolean = true,
+    // Edge Bar Customization (Matched to user screenshot)
+    val edgeBarColor: String = "#00E5FF",
+    val edgeBarHeight: Float = 64f,
+    val edgeBarCornerRadius: Float = 19f,
+    val edgeBarBottomOffset: Float = 6f,
+    val edgeBarHorizontalMargin: Float = 14f,
+    val edgeBarGlassOpacity: Float = 30f,
+    val edgeBarAutoHideOnScroll: Boolean = false,
+    val topBarAutoHideOnScroll: Boolean = false,
 
     // Local Snapshot Backup
     val localBackupSnapshot: String = ""

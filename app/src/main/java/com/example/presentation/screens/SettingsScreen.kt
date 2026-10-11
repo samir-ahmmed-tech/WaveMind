@@ -7,10 +7,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -567,6 +569,23 @@ fun SettingsScreen(
                 }
 
                 // Glass Surface Opacity Slider (REQUESTED: 1% to 500%)
+                // App UI Scale / DP Size Slider (Requested: 70% to 200%, default 85%)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "App UI Scale (ডিপি সাইজ স্কেলিং)", fontSize = 12.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text(text = "${prefs.uiScalePercent.toInt()}%", fontSize = 12.sp, color = primaryCyberColor, fontWeight = FontWeight.Bold)
+                    }
+                    CyberSlider(
+                        value = prefs.uiScalePercent,
+                        onValueChange = { viewModel.updateSetting(PreferencesManager.UI_SCALE_PERCENT.name, it) },
+                        valueRange = 70f..200f,
+                        accentColor = primaryCyberColor
+                    )
+                }
+
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -576,14 +595,14 @@ fun SettingsScreen(
                         Text(text = "${prefs.glassOpacity.toInt()}%", fontSize = 12.sp, color = primaryCyberColor, fontWeight = FontWeight.Bold)
                     }
                     CyberSlider(
-                        value = prefs.glassOpacity,
+                        value = prefs.glassOpacity.coerceIn(10f, 100f),
                         onValueChange = { viewModel.updateSetting(PreferencesManager.GLASS_OPACITY.name, it) },
-                        valueRange = 1f..500f,
+                        valueRange = 10f..100f,
                         accentColor = primaryCyberColor
                     )
                 }
 
-                // Card Corner Squircle Radius Slider (REQUESTED: 1dp to 100dp)
+                // Card Corner Squircle Radius Slider
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -595,12 +614,12 @@ fun SettingsScreen(
                     CyberSlider(
                         value = prefs.cardCornerRadius,
                         onValueChange = { viewModel.updateSetting(PreferencesManager.CARD_CORNER_RADIUS.name, it) },
-                        valueRange = 1f..100f,
+                        valueRange = 1f..32f,
                         accentColor = primaryCyberColor
                     )
                 }
 
-                // Border Outline Width Slider (REQUESTED: 1px to 50px)
+                // Border Outline Width Slider
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -612,12 +631,12 @@ fun SettingsScreen(
                     CyberSlider(
                         value = prefs.borderThickness,
                         onValueChange = { viewModel.updateSetting(PreferencesManager.BORDER_THICKNESS.name, it) },
-                        valueRange = 1f..50f,
+                        valueRange = 1f..10f,
                         accentColor = primaryCyberColor
                     )
                 }
 
-                // Neon Glow Aura Slider (REQUESTED: 1% to 500%)
+                // Neon Glow Aura Slider
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -627,9 +646,9 @@ fun SettingsScreen(
                         Text(text = "${prefs.glowIntensity.toInt()}%", fontSize = 12.sp, color = primaryCyberColor, fontWeight = FontWeight.Bold)
                     }
                     CyberSlider(
-                        value = prefs.glowIntensity,
+                        value = prefs.glowIntensity.coerceIn(10f, 100f),
                         onValueChange = { viewModel.updateSetting(PreferencesManager.GLOW_INTENSITY.name, it) },
-                        valueRange = 1f..500f,
+                        valueRange = 10f..100f,
                         accentColor = primaryCyberColor
                     )
                 }
@@ -2369,6 +2388,62 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
+        }
+
+        // ==========================================
+        // 9. OFFICIAL WAVEMIND APP SUITE INFO CARD
+        // ==========================================
+        FuturisticCard(
+            modifier = Modifier.fillMaxWidth(),
+            borderColor = primaryCyberColor.copy(alpha = 0.5f),
+            themePreset = prefs.themePreset,
+            glassOpacity = prefs.glassOpacity,
+            cornerRadius = prefs.cardCornerRadius.dp
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = com.example.R.drawable.app_logo),
+                    contentDescription = "WaveMind Official Logo",
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(1.5.dp, primaryCyberColor.copy(alpha = 0.7f), RoundedCornerShape(16.dp))
+                )
+
+                Text(
+                    text = "WaveMind",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = primaryCyberColor,
+                    letterSpacing = 1.sp
+                )
+
+                Text(
+                    text = "v1.0.0 (Official Release)",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+
+                Text(
+                    text = "29 Calibrated Cognitive Drills • 120 FPS High Refresh Rate Engine\nZero-Lag Render Architecture • 3D Behind-Card Nebula Underglow",
+                    fontSize = 11.sp,
+                    color = TextSecondary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    lineHeight = 16.sp
+                )
+
+                Text(
+                    text = "Crafted for Peak Neural Acuity",
+                    fontSize = 10.sp,
+                    color = primaryCyberColor.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
 

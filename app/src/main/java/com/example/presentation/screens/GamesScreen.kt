@@ -67,7 +67,7 @@ fun GamesScreen(
     val prefs by viewModel.userPreferences.collectAsState()
     val primaryCyberColor = com.example.parseCyberColor(prefs.primaryColor, NeonCyan)
 
-    val categories = listOf("All", "Favorites", "Memory", "Logic", "Focus")
+    val categories = listOf("All", "Favorites", "Memory", "Logic", "Focus", "Reflex", "Speed")
 
     LazyColumn(
         modifier = modifier

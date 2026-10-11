@@ -60,8 +60,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.domain.models.GameItem
 import com.example.presentation.games.AnagramBlitzGame
+import com.example.presentation.games.ChangeBlindnessGame
+import com.example.presentation.games.ChronoTapGame
+import com.example.presentation.games.CipherShiftGame
+import com.example.presentation.games.ColorFloodGame
+import com.example.presentation.games.ConstellationConnectGame
+import com.example.presentation.games.CyberStackerGame
 import com.example.presentation.games.FocusFlowGame
+import com.example.presentation.games.MathMatrixGame
+import com.example.presentation.games.NumberGridRushGame
 import com.example.presentation.games.OddOneOutGame
+import com.example.presentation.games.QuickSortGame
+import com.example.presentation.games.SilhouetteMatchGame
+import com.example.presentation.games.TargetAimGame
+import com.example.presentation.games.ToneMemoryGame
+import com.example.presentation.games.TypingBlitzGame
+import com.example.presentation.games.WordMorphGame
+import com.example.presentation.games.ZenBalanceGame
 import com.example.presentation.games.CardFlipperGame
 import com.example.presentation.games.CodeBreakerGame
 import com.example.presentation.games.DualNBackGame
@@ -658,6 +673,81 @@ fun GamePlayerScreen(
                             )
 
                             "anagram_blitz" -> AnagramBlitzGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "chrono_tap" -> ChronoTapGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "word_morph" -> WordMorphGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "math_matrix" -> MathMatrixGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "target_aim" -> TargetAimGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "tone_memory" -> ToneMemoryGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "cipher_shift" -> CipherShiftGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "silhouette_match" -> SilhouetteMatchGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "zen_balance" -> ZenBalanceGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "quick_sort" -> QuickSortGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "cyber_stacker" -> CyberStackerGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "change_blindness" -> ChangeBlindnessGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "constellation_connect" -> ConstellationConnectGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "color_flood" -> ColorFloodGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "typing_blitz" -> TypingBlitzGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "number_grid_rush" -> NumberGridRushGame(
                                 difficulty = selectedDifficulty,
                                 onGameOver = handleGameOver
                             )

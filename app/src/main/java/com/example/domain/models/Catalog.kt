@@ -123,6 +123,126 @@ object AppCatalog {
             difficulty = "Medium",
             description = "Unscramble encrypted cyber vocabulary against a high-speed countdown.",
             iconEmoji = "🔤"
+        ),
+        GameItem(
+            id = "chrono_tap",
+            title = "Chrono Tap",
+            category = "Reflex",
+            difficulty = "Easy",
+            description = "Tap precisely when kinetic rings align within the resonance target window.",
+            iconEmoji = "⏱️"
+        ),
+        GameItem(
+            id = "word_morph",
+            title = "Word Morph",
+            category = "Logic",
+            difficulty = "Medium",
+            description = "Transform source words letter-by-letter to bridge lexicon targets.",
+            iconEmoji = "🔡"
+        ),
+        GameItem(
+            id = "math_matrix",
+            title = "Math Matrix",
+            category = "Logic",
+            difficulty = "Hard",
+            description = "Synthesize matrix cells to reach dynamic target arithmetic sums.",
+            iconEmoji = "🔢"
+        ),
+        GameItem(
+            id = "target_aim",
+            title = "Target Aim",
+            category = "Reflex",
+            difficulty = "Medium",
+            description = "Kinetic reflex targeting: eliminate dynamic orbital nodes before expiration.",
+            iconEmoji = "🎯"
+        ),
+        GameItem(
+            id = "tone_memory",
+            title = "Tone Memory",
+            category = "Memory",
+            difficulty = "Medium",
+            description = "Replay multi-chromatic frequency audio-visual sequences.",
+            iconEmoji = "🎵"
+        ),
+        GameItem(
+            id = "cipher_shift",
+            title = "Cipher Shift",
+            category = "Logic",
+            difficulty = "Hard",
+            description = "Decrypt Caesar rot-shifted cryptograms under neural clock countdown.",
+            iconEmoji = "🗝️"
+        ),
+        GameItem(
+            id = "silhouette_match",
+            title = "Silhouette Match",
+            category = "Focus",
+            difficulty = "Medium",
+            description = "Identify matching geometric silhouettes through mental spatial rotation.",
+            iconEmoji = "👥"
+        ),
+        GameItem(
+            id = "zen_balance",
+            title = "Zen Balance",
+            category = "Focus",
+            difficulty = "Hard",
+            description = "Maintain kinetic particle equilibrium within the cyber magnetic focal zone.",
+            iconEmoji = "☯️"
+        ),
+        GameItem(
+            id = "quick_sort",
+            title = "Quick Sort",
+            category = "Speed",
+            difficulty = "Easy",
+            description = "Rapid dual-category sorting: swipe or tap odd/even binary streams.",
+            iconEmoji = "⚡"
+        ),
+        GameItem(
+            id = "cyber_stacker",
+            title = "Cyber Stacker",
+            category = "Focus",
+            difficulty = "Medium",
+            description = "Stack oscillating cyber blocks with pixel-perfect alignment precision.",
+            iconEmoji = "🧱"
+        ),
+        GameItem(
+            id = "change_blindness",
+            title = "Change Blindness",
+            category = "Focus",
+            difficulty = "Hard",
+            description = "Detect subtle chromatic anomalies between flashing cyber frames.",
+            iconEmoji = "👁️"
+        ),
+        GameItem(
+            id = "constellation_connect",
+            title = "Constellation",
+            category = "Logic",
+            difficulty = "Medium",
+            description = "Topological pathfinding: link stellar nodes in exact numerical sequence.",
+            iconEmoji = "✨"
+        ),
+        GameItem(
+            id = "color_flood",
+            title = "Color Flood",
+            category = "Logic",
+            difficulty = "Hard",
+            description = "Algorithmic flood cascade: unify the chromatic neural matrix in minimal moves.",
+            iconEmoji = "🌊"
+        ),
+        GameItem(
+            id = "typing_blitz",
+            title = "Typing Blitz",
+            category = "Speed",
+            difficulty = "Medium",
+            description = "High-velocity cyber terminal command transcription under time pressure.",
+            iconEmoji = "💻"
+        ),
+        GameItem(
+            id = "number_grid_rush",
+            title = "Grid Rush",
+            category = "Speed",
+            difficulty = "Easy",
+            description = "Schulte numerical matrix scan: locate sequential numbers 1-16 at peak speed.",
+            iconEmoji = "🏁"
         )
     )
 }

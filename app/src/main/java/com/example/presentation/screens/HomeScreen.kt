@@ -1,9 +1,11 @@
 package com.example.presentation.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,6 +87,61 @@ fun HomeScreen(
             .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // TOP WAVEMIND BRAND HEADER
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = com.example.R.drawable.app_logo),
+                    contentDescription = "WaveMind Logo",
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(1.2.dp, primaryCyberColor.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+                )
+                Column {
+                    Text(
+                        text = "WaveMind",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = primaryCyberColor,
+                        letterSpacing = 0.8.sp
+                    )
+                    Text(
+                        text = "120 FPS NEURAL COGNITION SUITE",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                        letterSpacing = 1.2.sp
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(primaryCyberColor.copy(alpha = 0.15f))
+                    .border(1.dp, primaryCyberColor.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "29 DRILLS",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = primaryCyberColor,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+
         // TOP OPERATIVE PROFILE CARD
         FuturisticCard(
             modifier = Modifier.fillMaxWidth(),

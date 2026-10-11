@@ -49,6 +49,7 @@ import com.example.ui.components.LocalCardGlowConfig
 import com.example.ui.components.NavTab
 import com.example.ui.theme.BrineBoosterTheme
 import com.example.ui.theme.NeonCyan
+import com.example.ui.theme.WaveMindTheme
 
 fun parseCyberColor(hex: String, defaultColor: Color = NeonCyan): Color {
     return try {
@@ -146,7 +147,17 @@ class MainActivity : ComponentActivity() {
                 primaryColor = primaryColor,
                 backgroundColor = backgroundColor
             ) {
+                val currentDensity = androidx.compose.ui.platform.LocalDensity.current
+                val dpFactor = (prefs.uiScalePercent / 100f).coerceIn(0.65f, 2.0f)
+                val scaledDensity = remember(currentDensity, dpFactor, prefs.fontScalePercent) {
+                    androidx.compose.ui.unit.Density(
+                        density = currentDensity.density * dpFactor,
+                        fontScale = currentDensity.fontScale * (prefs.fontScalePercent / 100f).coerceIn(0.7f, 1.5f)
+                    )
+                }
+
                 CompositionLocalProvider(
+                    androidx.compose.ui.platform.LocalDensity provides scaledDensity,
                     LocalCardGlowConfig provides cardGlowConfig,
                     LocalCardAnimationClock provides { glowAngle.value }
                 ) {

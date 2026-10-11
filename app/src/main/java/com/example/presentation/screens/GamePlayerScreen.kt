@@ -59,6 +59,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.domain.models.GameItem
+import com.example.presentation.games.AnagramBlitzGame
+import com.example.presentation.games.FocusFlowGame
+import com.example.presentation.games.OddOneOutGame
 import com.example.presentation.games.CardFlipperGame
 import com.example.presentation.games.CodeBreakerGame
 import com.example.presentation.games.DualNBackGame
@@ -640,6 +643,21 @@ fun GamePlayerScreen(
                             )
 
                             "reaction_time" -> ReactionTimeGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "focus_flow" -> FocusFlowGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "odd_one_out" -> OddOneOutGame(
+                                difficulty = selectedDifficulty,
+                                onGameOver = handleGameOver
+                            )
+
+                            "anagram_blitz" -> AnagramBlitzGame(
                                 difficulty = selectedDifficulty,
                                 onGameOver = handleGameOver
                             )

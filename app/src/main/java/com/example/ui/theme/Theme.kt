@@ -323,7 +323,7 @@ fun getCyberColorScheme(
 )
 
 @Composable
-fun BrineBoosterTheme(
+fun WaveMindTheme(
     primaryColor: Color = NeonCyan,
     backgroundColor: Color = CyberVoidBlack,
     typography: Typography = com.example.ui.theme.Typography,
@@ -335,3 +335,11 @@ fun BrineBoosterTheme(
         content = content
     )
 }
+
+@Composable
+fun BrineBoosterTheme(
+    primaryColor: Color = NeonCyan,
+    backgroundColor: Color = CyberVoidBlack,
+    typography: Typography = com.example.ui.theme.Typography,
+    content: @Composable () -> Unit
+) = WaveMindTheme(primaryColor, backgroundColor, typography, content)

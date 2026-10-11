@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +25,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
@@ -34,32 +32,29 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.ThemeRegistry
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
 
 /**
  * Aura Size specification:
- * - XS: Extra small micro aura (spread 5dp)
- * - SM: Small compact aura (spread 10dp)
- * - MD: Standard balanced aura (spread 16dp)
- * - LG: Expansive vibrant aura (spread 24dp)
- * - XL: Ultra-wide dramatic aura (spread 36dp)
+ * - XS: Extra small micro aura (spread 8dp)
+ * - SM: Small compact aura (spread 16dp)
+ * - MD: Standard balanced aura (spread 24dp)
+ * - LG: Expansive vibrant aura (spread 36dp)
+ * - XL: Ultra-wide dramatic aura (spread 50dp)
  */
 enum class AuraSize(
     val code: String,
     val label: String,
-    val spreadDp: Float,
-    val blurDp: Float,
-    val elevationDp: Float,
+    val spreadFactor: Float,
     val alphaFactor: Float
 ) {
-    XS("aura-xs", "XS", 5f, 10f, 4f, 0.65f),
-    SM("aura-sm", "SM", 10f, 16f, 8f, 0.78f),
-    MD("aura", "MD", 16f, 24f, 14f, 0.90f),
-    LG("aura-lg", "LG", 24f, 34f, 18f, 1.0f),
-    XL("aura-xl", "XL", 36f, 48f, 24f, 1.10f);
+    XS("aura-xs", "XS", 0.75f, 0.70f),
+    SM("aura-sm", "SM", 0.90f, 0.85f),
+    MD("aura", "MD", 1.05f, 1.0f),
+    LG("aura-lg", "LG", 1.25f, 1.15f),
+    XL("aura-xl", "XL", 1.50f, 1.25f);
 
     companion object {
         fun fromString(str: String): AuraSize = when (str.trim().uppercase()) {
@@ -73,24 +68,25 @@ enum class AuraSize(
 }
 
 /**
- * 4 Modern Card Animation Types:
- * 1. Rotating 3D Aura: Orbital perimeter gradient sweep around the top border
- * 2. Floating 3D Levitation: Smooth 3D depth tilt & vertical levitation floating with soft drop shadow
- * 3. Neon Pulse: Rhythmic organic expansion and luminosity pulsing
- * 4. Holographic Wave: Diagonal sci-fi light beam sweeping across the card
+ * Modern Card Animation Types:
+ * 1. RADIAL_ORB_3D: Google / Firebase signature 3D radial orb emerging from behind the card
+ * 2. FLOATING_3D: GitHub 3D spatial levitation with dynamic elevation & depth tilt
+ * 3. COSMIC_PULSE: Rhythmic breathing radial glow radiating beneath the card
+ * 4. HOLOGRAPHIC_WAVE: Cyber diagonal light beam with subtle glass sheen
  */
 enum class CardAnimationType(val displayName: String, val description: String) {
-    ROTATING_AURA("Rotating 3D Aura", "Orbital gradient beam circulating along the card border"),
-    FLOATING_3D("Floating 3D Levitation", "Smooth physics-based vertical levitation & subtle 3D perspective tilt"),
-    NEON_PULSE("Neon Pulse", "Rhythmic luminous expansion and organic breathing glow"),
-    HOLOGRAPHIC_WAVE("Holographic Wave", "Diagonal cyber light beam sweeping across the card surface");
+    RADIAL_ORB_3D("Google / Firebase 3D Radial Nebula", "Circular glowing orb moving beneath the card, radiating out from behind with 3D depth"),
+    FLOATING_3D("GitHub 3D Spatial Levitation", "Smooth physics-based vertical levitation & subtle 3D perspective tilt"),
+    COSMIC_PULSE("Behind-Card Cosmic Pulse", "Rhythmic luminous expansion and organic breathing glow under the card"),
+    HOLOGRAPHIC_WAVE("Holographic 3D Glass", "Diagonal cyber light beam sweeping across the card surface with specular rim");
 
     companion object {
         fun fromString(str: String): CardAnimationType = when (str.trim().lowercase()) {
-            "floating 3d levitation", "floating 3d", "floating", "levitation" -> FLOATING_3D
-            "neon pulse", "pulse", "breathing" -> NEON_PULSE
-            "holographic wave", "holographic", "shimmer", "wave" -> HOLOGRAPHIC_WAVE
-            else -> ROTATING_AURA
+            "google / firebase 3d radial nebula", "3d radial nebula", "radial nebula", "radial_orb_3d", "radial" -> RADIAL_ORB_3D
+            "github 3d spatial levitation", "floating 3d levitation", "floating 3d", "floating", "levitation" -> FLOATING_3D
+            "behind-card cosmic pulse", "cosmic pulse", "neon pulse", "pulse", "breathing" -> COSMIC_PULSE
+            "holographic 3d glass", "holographic wave", "holographic", "shimmer", "wave" -> HOLOGRAPHIC_WAVE
+            else -> RADIAL_ORB_3D
         }
     }
 }
@@ -100,13 +96,13 @@ enum class CardAnimationType(val displayName: String, val description: String) {
  */
 data class CardGlowConfig(
     val enabled: Boolean = true,
-    val animationType: String = "Rotating 3D Aura",
+    val animationType: String = "Google / Firebase 3D Radial Nebula",
     val preset: String = "Cyber Glow",
     val speedSeconds: Float = 2.0f,
-    val thicknessDp: Float = 2.0f,
+    val thicknessDp: Float = 1.8f,
     val auraIntensity: Float = 75f,
-    // Only "Above Card" is supported as per user requirement (Top layer only)
-    val layer: String = "Above Card",
+    // Layer options: "Behind Card (3D Underglow)", "Above Card", "Both (Dual 3D Dimension)"
+    val layer: String = "Behind Card (3D Underglow)",
     val effectStyle: String = "Cyber Glow",
     val animationScale: Float = 1.15f,
     val depth3d: Float = 14f,
@@ -116,7 +112,7 @@ data class CardGlowConfig(
     val auraSize: String = "MD",
     val auraDurationMs: Int = 2000,
     val cardSizeScale: Float = 1.0f,
-    val smoothPerformanceMode: Boolean = false
+    val smoothPerformanceMode: Boolean = true
 )
 
 val LocalCardGlowConfig = compositionLocalOf { CardGlowConfig() }
@@ -149,7 +145,7 @@ fun FuturisticCard(
     shape: Shape = RoundedCornerShape(cornerRadius),
     borderColor: Color = NeonCyan,
     glowColor: Color = NeonCyan,
-    glowIntensity: Float = 0.6f,
+    glowIntensity: Float = 0.65f,
     borderWidth: Dp = 1.2.dp,
     borderThickness: Dp = borderWidth,
     contentPadding: Dp = 14.dp,
@@ -197,8 +193,46 @@ fun FuturisticCard(
         CardAnimationType.fromString(glowConfig.animationType)
     }
 
+    val auraSizeEnum = remember(glowConfig.auraSize) {
+        AuraSize.fromString(glowConfig.auraSize)
+    }
+
     val isAnimationActive = glowConfig.enabled && isAnimated
     val sizeScaleFactor = glowConfig.cardSizeScale.coerceIn(0.6f, 2.0f)
+
+    val renderUnderglow = glowConfig.layer.contains("Behind", ignoreCase = true) || glowConfig.layer.contains("Both", ignoreCase = true)
+    val renderTopBorder = glowConfig.layer.contains("Above", ignoreCase = true) || glowConfig.layer.contains("Both", ignoreCase = true)
+
+    // Pre-allocate cached color lists to guarantee zero garbage-collector allocations during 120 FPS draw passes
+    val underglowColors = remember(primaryAccent, glowConfig.auraIntensity, auraSizeEnum) {
+        val intensityRatio = (glowConfig.auraIntensity / 100f) * auraSizeEnum.alphaFactor
+        listOf(
+            primaryAccent.copy(alpha = (0.50f * intensityRatio).coerceIn(0.12f, 0.85f)),
+            primaryAccent.copy(alpha = (0.18f * intensityRatio).coerceIn(0.04f, 0.45f)),
+            Color.Transparent
+        )
+    }
+
+    val dualUnderglowColors = remember(primaryAccent, glowConfig.auraIntensity) {
+        val intensityRatio = (glowConfig.auraIntensity / 100f)
+        listOf(
+            primaryAccent.copy(alpha = (0.45f * intensityRatio).coerceIn(0.10f, 0.75f)),
+            Color(0xFF8B5CF6).copy(alpha = (0.22f * intensityRatio).coerceIn(0.05f, 0.40f)),
+            Color.Transparent
+        )
+    }
+
+    val topBorderColors = remember(primaryAccent) {
+        listOf(
+            primaryAccent,
+            Color.White,
+            primaryAccent.copy(alpha = 0.8f),
+            Color(0xFF8B5CF6),
+            primaryAccent.copy(alpha = 0.15f),
+            Color.Transparent,
+            primaryAccent
+        )
+    }
 
     // Outer Container
     Box(
@@ -208,53 +242,122 @@ fun FuturisticCard(
                 val clockDeg = clockProvider()
                 val clockRad = Math.toRadians(clockDeg.toDouble())
 
-                // Scale factor from settings
                 scaleX = clickScale * sizeScaleFactor
                 scaleY = clickScale * sizeScaleFactor
 
                 if (isAnimationActive) {
                     when (animType) {
-                        CardAnimationType.FLOATING_3D -> {
-                            // Smooth floating bobbing and subtle 3D perspective tilt
-                            val floatOffset = sin(clockRad * 1.5).toFloat() * 6.5f
-                            val tiltAngle = cos(clockRad * 1.2).toFloat() * 1.8f
+                        CardAnimationType.FLOATING_3D, CardAnimationType.RADIAL_ORB_3D -> {
+                            // Smooth physics floating & perspective tilt (Zero recomposition, pure GPU transform)
+                            val floatOffset = sin(clockRad * 1.4).toFloat() * 4.5f
+                            val tiltX = cos(clockRad * 1.2).toFloat() * 1.5f
+                            val tiltY = sin(clockRad * 1.1).toFloat() * 1.2f
                             translationY = floatOffset
-                            rotationZ = tiltAngle * 0.4f
-                            rotationX = cos(clockRad * 1.5).toFloat() * 2.2f
+                            rotationX = tiltX
+                            rotationY = tiltY
                             cameraDistance = 16f * density
                         }
-                        CardAnimationType.NEON_PULSE -> {
-                            // Rhythmic gentle scale expansion
-                            val pulseFactor = 1.0f + (sin(clockRad * 2.0).toFloat() * 0.012f)
+                        CardAnimationType.COSMIC_PULSE -> {
+                            val pulseFactor = 1.0f + (sin(clockRad * 2.0).toFloat() * 0.008f)
                             scaleX *= pulseFactor
                             scaleY *= pulseFactor
                         }
                         else -> {
-                            // ROTATING_AURA & HOLOGRAPHIC_WAVE: handled in draw layer
                             translationY = 0f
-                            rotationZ = 0f
                             rotationX = 0f
+                            rotationY = 0f
                         }
                     }
                 }
                 clip = false
             }
             .then(
-                if (isAnimationActive && animType == CardAnimationType.FLOATING_3D && glowConfig.depth3d > 0f) {
+                // BEHIND-THE-CARD 3D UNDERGLOW (Google / Firebase / GitHub landing page card effect)
+                if (isAnimationActive && renderUnderglow) {
                     Modifier.drawBehind {
                         val clockDeg = clockProvider()
                         val clockRad = Math.toRadians(clockDeg.toDouble())
-                        val dynamicElevation = glowConfig.depth3d.dp.toPx() + (sin(clockRad * 1.5).toFloat() * 4f)
-                        val shadowOffsetY = dynamicElevation * 0.75f
-                        val shadowSpread = dynamicElevation * 0.40f
                         val crPx = effectiveCornerRadius.toPx()
 
-                        drawRoundRect(
-                            color = Color.Black.copy(alpha = 0.60f),
-                            topLeft = Offset(-shadowSpread * 0.2f, shadowOffsetY),
-                            size = Size(size.width + shadowSpread * 0.4f, size.height + shadowSpread * 0.25f),
-                            cornerRadius = CornerRadius(crPx + shadowSpread * 0.2f)
-                        )
+                        when (animType) {
+                            CardAnimationType.RADIAL_ORB_3D -> {
+                                // Circular glowing orb moving smoothly beneath the card, radiating outwards
+                                val cos = cos(clockRad).toFloat()
+                                val sin = sin(clockRad).toFloat()
+                                val cx = size.width * (0.50f + cos * 0.24f)
+                                val cy = size.height * (0.50f + sin * 0.20f)
+                                val baseRadius = hypot(size.width, size.height) * 0.52f * auraSizeEnum.spreadFactor
+
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = dualUnderglowColors,
+                                        center = Offset(cx, cy),
+                                        radius = baseRadius
+                                    ),
+                                    center = Offset(cx, cy),
+                                    radius = baseRadius
+                                )
+                            }
+
+                            CardAnimationType.FLOATING_3D -> {
+                                // Dynamic 3D elevation drop underglow that expands as card floats
+                                val dynamicElevation = glowConfig.depth3d.dp.toPx() + (sin(clockRad * 1.4).toFloat() * 4.5f)
+                                val shadowSpread = dynamicElevation * 0.65f * auraSizeEnum.spreadFactor
+                                val shadowOffsetY = dynamicElevation * 0.85f
+
+                                // Ambient black shadow base
+                                drawRoundRect(
+                                    color = Color.Black.copy(alpha = 0.55f),
+                                    topLeft = Offset(-shadowSpread * 0.25f, shadowOffsetY),
+                                    size = Size(size.width + shadowSpread * 0.5f, size.height + shadowSpread * 0.35f),
+                                    cornerRadius = CornerRadius(crPx + shadowSpread * 0.2f)
+                                )
+
+                                // Soft colored glow halo under the bottom edge
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = underglowColors,
+                                        center = Offset(size.width / 2f, size.height + shadowOffsetY * 0.5f),
+                                        radius = size.width * 0.60f
+                                    ),
+                                    center = Offset(size.width / 2f, size.height + shadowOffsetY * 0.5f),
+                                    radius = size.width * 0.60f
+                                )
+                            }
+
+                            CardAnimationType.COSMIC_PULSE -> {
+                                // Rhythmic breathing radial halo beneath card center
+                                val pulseRadius = hypot(size.width, size.height) * 0.48f * auraSizeEnum.spreadFactor * (1.0f + (sin(clockRad * 2.2).toFloat() * 0.12f))
+                                val cx = size.width / 2f
+                                val cy = size.height / 2f
+
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = underglowColors,
+                                        center = Offset(cx, cy),
+                                        radius = pulseRadius
+                                    ),
+                                    center = Offset(cx, cy),
+                                    radius = pulseRadius
+                                )
+                            }
+
+                            CardAnimationType.HOLOGRAPHIC_WAVE -> {
+                                // Ambient wide soft underglow
+                                val cx = size.width / 2f
+                                val cy = size.height / 2f
+                                val r = hypot(size.width, size.height) * 0.50f * auraSizeEnum.spreadFactor
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = underglowColors,
+                                        center = Offset(cx, cy),
+                                        radius = r
+                                    ),
+                                    center = Offset(cx, cy),
+                                    radius = r
+                                )
+                            }
+                        }
                     }
                 } else Modifier
             )
@@ -267,11 +370,11 @@ fun FuturisticCard(
                 .background(color = cardBackground, shape = finalShape)
                 .drawBehind {
                     if (themeConfig.hasSpecularHighlight) {
-                        val specularHeight = size.height * 0.35f
+                        val specularHeight = size.height * 0.32f
                         drawRect(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    Color.White.copy(alpha = 0.12f * opacityRatio.coerceAtMost(1f)),
+                                    Color.White.copy(alpha = 0.10f * opacityRatio.coerceAtMost(1f)),
                                     Color.Transparent
                                 ),
                                 startY = 0f,
@@ -290,118 +393,33 @@ fun FuturisticCard(
                     val clockDeg = clockProvider()
                     val clockRad = Math.toRadians(clockDeg.toDouble())
 
-                    if (!isAnimationActive) {
-                        // Static standard border
+                    // Top layer border drawing
+                    if (!isAnimationActive || !renderTopBorder) {
+                        // Clean, high-performance static cyber border with specular rim
                         drawRoundRect(
-                            color = primaryAccent.copy(alpha = 0.35f),
+                            color = primaryAccent.copy(alpha = 0.38f),
                             topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
                             size = Size(size.width - thicknessPx, size.height - thicknessPx),
                             cornerRadius = CornerRadius(crPx),
                             style = Stroke(width = thicknessPx)
                         )
+
+                        // Top rim specular highlight line
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.28f),
+                            start = Offset(crPx, thicknessPx / 2f),
+                            end = Offset(size.width - crPx, thicknessPx / 2f),
+                            strokeWidth = thicknessPx * 1.1f
+                        )
                         return@drawWithContent
                     }
 
-                    // Render selected top border animation
+                    // Selected top border animation
                     when (animType) {
-                        CardAnimationType.ROTATING_AURA -> {
-                            // Orbital perimeter gradient beam circulating along the card border
-                            val cos = cos(clockRad).toFloat()
-                            val sin = sin(clockRad).toFloat()
-                            val cx = size.width / 2f
-                            val cy = size.height / 2f
-                            val r = hypot(size.width, size.height) / 2f
-
-                            val p1 = Offset(cx - cos * r, cy - sin * r)
-                            val p2 = Offset(cx + cos * r, cy + sin * r)
-
-                            val borderBrush = Brush.linearGradient(
-                                colors = listOf(
-                                    primaryAccent,
-                                    Color.White,
-                                    primaryAccent.copy(alpha = 0.8f),
-                                    Color(0xFF8B5CF6),
-                                    primaryAccent.copy(alpha = 0.15f),
-                                    Color.Transparent,
-                                    primaryAccent
-                                ),
-                                start = p1,
-                                end = p2
-                            )
-
-                            drawRoundRect(
-                                brush = borderBrush,
-                                topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
-                                size = Size(size.width - thicknessPx, size.height - thicknessPx),
-                                cornerRadius = CornerRadius(crPx),
-                                style = Stroke(width = thicknessPx)
-                            )
-                        }
-
-                        CardAnimationType.NEON_PULSE -> {
-                            // Rhythmic breathing luminous border
-                            val pulseAlpha = 0.40f + (sin(clockRad * 2.5).toFloat() * 0.40f).coerceIn(0f, 0.55f)
-                            val dynamicThickness = thicknessPx * (1.0f + (sin(clockRad * 2.5).toFloat() * 0.3f).coerceIn(0f, 0.4f))
-
-                            drawRoundRect(
-                                color = primaryAccent.copy(alpha = pulseAlpha),
-                                topLeft = Offset(dynamicThickness / 2f, dynamicThickness / 2f),
-                                size = Size(size.width - dynamicThickness, size.height - dynamicThickness),
-                                cornerRadius = CornerRadius(crPx),
-                                style = Stroke(width = dynamicThickness)
-                            )
-
-                            // Inner soft neon line
-                            drawRoundRect(
-                                color = Color.White.copy(alpha = pulseAlpha * 0.7f),
-                                topLeft = Offset(dynamicThickness, dynamicThickness),
-                                size = Size(size.width - dynamicThickness * 2f, size.height - dynamicThickness * 2f),
-                                cornerRadius = CornerRadius((crPx - dynamicThickness).coerceAtLeast(0f)),
-                                style = Stroke(width = 1.dp.toPx())
-                            )
-                        }
-
-                        CardAnimationType.HOLOGRAPHIC_WAVE -> {
-                            // Diagonal cyber light sweep across top surface
-                            val waveProgress = ((clockDeg % 360f) / 360f)
-                            val totalSpan = size.width + size.height
-                            val waveCenter = waveProgress * totalSpan
-                            val waveWidth = size.width * 0.45f
-
-                            val sweepBrush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    primaryAccent.copy(alpha = 0.15f),
-                                    Color.White.copy(alpha = 0.45f),
-                                    primaryAccent.copy(alpha = 0.35f),
-                                    Color.Transparent
-                                ),
-                                start = Offset(waveCenter - waveWidth, 0f),
-                                end = Offset(waveCenter + waveWidth, size.height)
-                            )
-
-                            // Draw light beam sweep overlay
-                            drawRoundRect(
-                                brush = sweepBrush,
-                                topLeft = Offset(0f, 0f),
-                                size = size,
-                                cornerRadius = CornerRadius(crPx)
-                            )
-
-                            // Clean cyber outline
+                        CardAnimationType.RADIAL_ORB_3D, CardAnimationType.FLOATING_3D -> {
+                            // Elevated cyber glowing outline with illuminated top crest
                             drawRoundRect(
                                 color = primaryAccent.copy(alpha = 0.50f),
-                                topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
-                                size = Size(size.width - thicknessPx, size.height - thicknessPx),
-                                cornerRadius = CornerRadius(crPx),
-                                style = Stroke(width = thicknessPx)
-                            )
-                        }
-
-                        CardAnimationType.FLOATING_3D -> {
-                            // Elevated cyber glowing outline with illuminated top edge
-                            drawRoundRect(
-                                color = primaryAccent.copy(alpha = 0.60f),
                                 topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
                                 size = Size(size.width - thicknessPx, size.height - thicknessPx),
                                 cornerRadius = CornerRadius(crPx),
@@ -410,10 +428,53 @@ fun FuturisticCard(
 
                             // Specular crest highlight on top rim
                             drawLine(
-                                color = Color.White.copy(alpha = 0.75f),
+                                color = Color.White.copy(alpha = 0.70f),
                                 start = Offset(crPx, thicknessPx / 2f),
                                 end = Offset(size.width - crPx, thicknessPx / 2f),
                                 strokeWidth = thicknessPx * 1.2f
+                            )
+                        }
+
+                        CardAnimationType.COSMIC_PULSE -> {
+                            val pulseAlpha = 0.35f + (sin(clockRad * 2.2).toFloat() * 0.30f).coerceIn(0f, 0.45f)
+                            drawRoundRect(
+                                color = primaryAccent.copy(alpha = pulseAlpha),
+                                topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
+                                size = Size(size.width - thicknessPx, size.height - thicknessPx),
+                                cornerRadius = CornerRadius(crPx),
+                                style = Stroke(width = thicknessPx)
+                            )
+                        }
+
+                        CardAnimationType.HOLOGRAPHIC_WAVE -> {
+                            val waveProgress = ((clockDeg % 360f) / 360f)
+                            val totalSpan = size.width + size.height
+                            val waveCenter = waveProgress * totalSpan
+                            val waveWidth = size.width * 0.40f
+
+                            drawRoundRect(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        primaryAccent.copy(alpha = 0.12f),
+                                        Color.White.copy(alpha = 0.40f),
+                                        primaryAccent.copy(alpha = 0.25f),
+                                        Color.Transparent
+                                    ),
+                                    start = Offset(waveCenter - waveWidth, 0f),
+                                    end = Offset(waveCenter + waveWidth, size.height)
+                                ),
+                                topLeft = Offset(0f, 0f),
+                                size = size,
+                                cornerRadius = CornerRadius(crPx)
+                            )
+
+                            drawRoundRect(
+                                color = primaryAccent.copy(alpha = 0.45f),
+                                topLeft = Offset(thicknessPx / 2f, thicknessPx / 2f),
+                                size = Size(size.width - thicknessPx, size.height - thicknessPx),
+                                cornerRadius = CornerRadius(crPx),
+                                style = Stroke(width = thicknessPx)
                             )
                         }
                     }

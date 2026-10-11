@@ -67,6 +67,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Enable Hardware 120 FPS / Maximum Display Refresh Rate
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            try {
+                val maxMode = display?.supportedModes?.maxByOrNull { it.refreshRate }
+                if (maxMode != null) {
+                    val lp = window.attributes
+                    lp.preferredDisplayModeId = maxMode.modeId
+                    window.attributes = lp
+                }
+            } catch (_: Exception) {
+                // Fallback to standard refresh mode
+            }
+        }
+
         setContent {
             val viewModel: MainViewModel = viewModel()
             val prefs by viewModel.userPreferences.collectAsState()
@@ -127,7 +142,7 @@ class MainActivity : ComponentActivity() {
                 label = "global_card_rotation_angle"
             )
 
-            BrineBoosterTheme(
+            WaveMindTheme(
                 primaryColor = primaryColor,
                 backgroundColor = backgroundColor
             ) {

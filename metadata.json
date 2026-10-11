@@ -1,6 +1,6 @@
 {
-  "name": "Remix Remix Remix Brine Booster 4",
-  "description": "Futuristic cognitive enhancement super-app featuring 24 brain training games, 16 productivity tools, AI Chatbot, and gamification.",
+  "name": "WaveMind",
+  "description": "Next-generation cognitive enhancement app featuring 14 brain training games, fluid 3D glassmorphic UI, customizable cybernetic underglow animations, and zero-lag 120 FPS performance.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-val Context.dataStore by preferencesDataStore(name = "brine_booster_prefs")
+val Context.dataStore by preferencesDataStore(name = "wavemind_prefs")
 
 data class UserPreferences(
     // Initialized to 0 for a clean fresh start as requested
@@ -21,9 +21,9 @@ data class UserPreferences(
     val xp: Int = 0,
     val streak: Int = 0,
     val bestScore: Int = 0,
-    val userName: String = "Cyber Neuralist",
-    val userAvatar: String = "🧠 Neural Core",
-    val userRankTitle: String = "Operative",
+    val userName: String = "WaveMind Operative",
+    val userAvatar: String = "⚡ Neural Core",
+    val userRankTitle: String = "WaveMind Master",
     val language: String = "English (US)",
 
     // Theme Engine Presets
@@ -56,14 +56,14 @@ data class UserPreferences(
 
     // Rotating Card & 3D Atmospheric Animation System
     val cardRotatingGlowEnabled: Boolean = true,
-    // 4 Modern Animation Types: "Rotating 3D Aura", "Floating 3D Levitation", "Neon Pulse", "Holographic Wave"
-    val cardAnimationType: String = "Rotating 3D Aura",
+    // Modern 3D Underglow: "Google / Firebase 3D Radial Nebula", "GitHub 3D Spatial Levitation", "Behind-Card Cosmic Pulse", "Holographic 3D Glass"
+    val cardAnimationType: String = "Google / Firebase 3D Radial Nebula",
     val cardGlowPreset: String = "Cyber Glow",
     val cardGlowSpeed: Float = 3.5f,
-    val cardGlowThickness: Float = 2.0f,
+    val cardGlowThickness: Float = 1.8f,
     val cardGlowAura: Float = 75f,
-    // User requested: ONLY Top / Above Card remains
-    val cardGlowLayer: String = "Above Card",
+    // Default: Behind Card (3D Underglow)
+    val cardGlowLayer: String = "Behind Card (3D Underglow)",
     val cardGlowEffectStyle: String = "Cyber Glow",
     val cardAnimationScale: Float = 1.15f,
     val card3dDepth: Float = 14f,
@@ -72,12 +72,12 @@ data class UserPreferences(
     val cardAuraSize: String = "MD",
     val cardAuraDuration: Int = 2000,
     val cardAuraBgColor: String = "",
-    val smoothPerformanceMode: Boolean = false,
+    val smoothPerformanceMode: Boolean = true,
 
     // FPS & Smooth Engine (30, 60, 90, 120, 144, 160 FPS)
-    val fpsTarget: Int = 60,
-    val fpsPreset: String = "Standard (60 FPS)", // "Smooth (30 FPS)", "Standard (60 FPS)", "Ultra (90 FPS)", "Ultra Max (120 FPS)", "Ultra Pro (144 FPS)", "Ultra Pro Max (160 FPS)"
-    val graphicsQuality: String = "Standard", // "Smooth", "Standard", "Ultra", "Ultra Max", "Ultra Pro"
+    val fpsTarget: Int = 120,
+    val fpsPreset: String = "Ultra Max (120 FPS)", // "Smooth (30 FPS)", "Standard (60 FPS)", "Ultra (90 FPS)", "Ultra Max (120 FPS)", "Ultra Pro (144 FPS)", "Ultra Pro Max (160 FPS)"
+    val graphicsQuality: String = "Ultra Max", // "Smooth", "Standard", "Ultra", "Ultra Max", "Ultra Pro"
 
     // Countdown Configuration (Default is 0 = OFF!)
     val countdownDuration: Int = 0,

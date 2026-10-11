@@ -99,6 +99,30 @@ object AppCatalog {
             difficulty = "Easy",
             description = "Measure millisecond-level neural reflexes upon chromatic trigger shift.",
             iconEmoji = "⚡"
+        ),
+        GameItem(
+            id = "focus_flow",
+            title = "Focus Flow",
+            category = "Focus",
+            difficulty = "Medium",
+            description = "Track high-velocity bouncing neural orbs across physics boundaries.",
+            iconEmoji = "🔮"
+        ),
+        GameItem(
+            id = "odd_one_out",
+            title = "Odd One Out",
+            category = "Focus",
+            difficulty = "Medium",
+            description = "Detect subtle chromatic and rotational anomalies across cyber grids.",
+            iconEmoji = "👁️"
+        ),
+        GameItem(
+            id = "anagram_blitz",
+            title = "Anagram Blitz",
+            category = "Logic",
+            difficulty = "Medium",
+            description = "Unscramble encrypted cyber vocabulary against a high-speed countdown.",
+            iconEmoji = "🔤"
         )
     )
 }

@@ -1404,30 +1404,46 @@ fun SettingsScreen(
                         }
                     }
 
-                    // 4. LAYER PLACEMENT (Top Layer Only as Requested)
+                    // 4. LAYER PLACEMENT (Behind Card 3D Underglow / Top Layer / Both)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = "Animation Layer Placement",
+                            text = "Animation Layer Placement (এনিমেশন লেয়ার অবস্থান)",
                             fontSize = 12.sp,
                             color = TextPrimary,
                             fontWeight = FontWeight.SemiBold
                         )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(primaryCyberColor.copy(alpha = 0.25f))
-                                .border(1.dp, primaryCyberColor, RoundedCornerShape(8.dp))
-                                .padding(horizontal = 14.dp),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Text(
-                                text = "✨ Top Layer (Above Card Surface)",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = primaryCyberColor
-                            )
+                            listOf(
+                                "Behind Card (3D Underglow)" to "✨ Behind (3D Underglow)",
+                                "Above Card" to "💫 Top Border",
+                                "Both (Dual 3D Dimension)" to "🌟 Both Layers"
+                            ).forEach { (layerKey, label) ->
+                                val isSel = prefs.cardGlowLayer == layerKey
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(42.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (isSel) primaryCyberColor.copy(alpha = 0.25f) else Color(0xFF090E17))
+                                        .border(1.dp, if (isSel) primaryCyberColor else Color(0x3300F0FF), RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            SoundManager.playClick()
+                                            viewModel.updateSetting(PreferencesManager.CARD_GLOW_LAYER.name, layerKey)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 10.sp,
+                                        fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSel) primaryCyberColor else TextSecondary,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -1504,10 +1520,10 @@ fun SettingsScreen(
                         )
 
                         listOf(
-                            Triple("Rotating 3D Aura", "🌀", "Orbital gradient beam circulating along top border"),
-                            Triple("Floating 3D Levitation", "🛸", "Smooth vertical levitation & subtle 3D tilt with depth shadow"),
-                            Triple("Neon Pulse", "💓", "Rhythmic luminous expansion and organic breathing glow"),
-                            Triple("Holographic Wave", "🌊", "Diagonal cyber light beam sweeping across the card surface")
+                            Triple("Google / Firebase 3D Radial Nebula", "🔮", "Circular glowing orb moving beneath the card with 3D glass depth"),
+                            Triple("GitHub 3D Spatial Levitation", "🛸", "Smooth vertical levitation & subtle 3D tilt with depth underglow"),
+                            Triple("Behind-Card Cosmic Pulse", "💓", "Rhythmic luminous expansion and organic breathing glow under the card"),
+                            Triple("Holographic 3D Glass", "🌊", "Diagonal cyber light beam sweeping across the surface with specular rim")
                         ).forEach { (animKey, icon, desc) ->
                             val isSel = prefs.cardAnimationType == animKey
                             Box(

@@ -102,8 +102,10 @@ jobs:
         id: prepare_asset
         run: |
           RELEASE_TMP_DIR=$(mktemp -d)
+          cp "app/build/outputs/apk/debug/app-debug.apk" "$RELEASE_TMP_DIR/WaveMind.apk"
           cp "app/build/outputs/apk/debug/app-debug.apk" "$RELEASE_TMP_DIR/app-debug.apk"
-          echo "asset_path=$RELEASE_TMP_DIR/app-debug.apk" >> "$GITHUB_OUTPUT"
+          echo "dir=$RELEASE_TMP_DIR" >> "$GITHUB_OUTPUT"
+          echo "asset_path=$RELEASE_TMP_DIR/WaveMind.apk" >> "$GITHUB_OUTPUT"
 
       - name: Publish APK to GitHub Releases
         id: create_release
@@ -112,42 +114,35 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh --version
-          ASSET_FILE="${{ steps.prepare_asset.outputs.asset_path }}"
-          if [ ! -f "$ASSET_FILE" ]; then
-            echo "Error: Prepared asset file does not exist: $ASSET_FILE"
-            exit 1
-          fi
-          if [ ! -s "$ASSET_FILE" ]; then
-            echo "Error: Prepared asset file is empty: $ASSET_FILE"
-            exit 1
-          fi
-          case "$ASSET_FILE" in
-            *.apk) ;;
-            *) echo "Error: Prepared asset file does not end with .apk"; exit 1 ;;
-          esac
-          ASSET_NAME=$(basename "$ASSET_FILE")
-          if [ "$ASSET_NAME" != "app-debug.apk" ]; then
-            echo "Error: Release asset filename must be app-debug.apk, got $ASSET_NAME"
+          WAVEMIND_APK="${{ steps.prepare_asset.outputs.dir }}/WaveMind.apk"
+          DEBUG_APK="${{ steps.prepare_asset.outputs.dir }}/app-debug.apk"
+
+          if [ ! -s "$WAVEMIND_APK" ]; then
+            echo "Error: WaveMind APK missing or empty: $WAVEMIND_APK"
             exit 1
           fi
 
-          TAG_NAME="debug-apk-build-${{ github.run_number }}-${{ github.run_attempt }}"
-          RELEASE_TITLE="Debug APK Build #${{ github.run_number }}"
+          TAG_NAME="v1.0.0-build-${{ github.run_number }}"
+          RELEASE_TITLE="WaveMind v1.0.0 (Build #${{ github.run_number }})"
 
           BODY_TEXT=$(cat <<EOF
-          ### Automated Debug APK Build
+          ### 🧠 WaveMind v1.0.0 - Official Release
 
-          - **Build Type**: Automatically generated debug APK
-          - **Builder**: GitHub Actions
-          - **Run Number**: ${{ github.run_number }}
-          - **Run Attempt**: ${{ github.run_attempt }}
-          - **Source Commit**: ${{ github.sha }}
-          - **Notice**: This APK is intended for testing and development purposes. It is not a Play Store production release.
-          - **Signing**: Signed only with a temporary debug keystore.
+          - **App Name**: WaveMind
+          - **Build**: #${{ github.run_number }} (Attempt ${{ github.run_attempt }})
+          - **Commit**: ${{ github.sha }}
+          - **Engine**: 120 FPS High Refresh Rate & Zero-Lag Render Engine
+          - **UI**: 3D Glassmorphism with Google/Firebase/GitHub Behind-the-Card 3D Radial Nebula Underglow
+          - **Games**: 14 Fully Calibrated Offline Cognitive Training Drills
+          - **Assets**: Official 3D Cybernetic WaveMind Icon
+
+          #### 📲 Downloads:
+          - **[WaveMind.apk](https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WaveMind.apk)** (Recommended)
+          - **[app-debug.apk](https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/app-debug.apk)**
           EOF
           )
 
-          gh release create "$TAG_NAME" "$ASSET_FILE" \
+          gh release create "$TAG_NAME" "$WAVEMIND_APK" "$DEBUG_APK" \
             --title "$RELEASE_TITLE" \
             --notes "$BODY_TEXT" \
             --target "${{ github.sha }}" \
@@ -160,17 +155,13 @@ jobs:
         run: |
           if [ "${{ steps.create_release.outcome }}" = "success" ]; then
             echo "GitHub Release published successfully."
-            gh release view "debug-apk-build-${{ github.run_number }}-${{ github.run_attempt }}" || true
-            echo "Release Tag: debug-apk-build-${{ github.run_number }}-${{ github.run_attempt }}"
-            echo "Release Title: Debug APK Build #${{ github.run_number }}"
-            echo "Release Asset: app-debug.apk"
-            DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/app-debug.apk"
-            echo "Direct APK Download URL: $DIRECT_URL"
+            DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WaveMind.apk"
+            echo "Direct WaveMind APK Download URL: $DIRECT_URL"
             echo "### DIRECT APK DOWNLOAD" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "Direct download link: [$DIRECT_URL]($DIRECT_URL)" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Note: The GitHub Actions backup artifact 'app-debug-apk' remains available." >> "$GITHUB_STEP_SUMMARY"
+            echo "Backup app-debug.apk: [app-debug.apk](https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/app-debug.apk)" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "WARNING: GitHub Release creation failed or encountered an error."
             echo "The APK build succeeded and the GitHub Actions backup artifact 'app-debug-apk' is available."

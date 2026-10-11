@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Remix Brine Booster 4",
+  "description": "Futuristic cognitive enhancement super-app featuring 24 brain training games, 16 productivity tools, AI Chatbot, and gamification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

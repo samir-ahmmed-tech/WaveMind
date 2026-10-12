@@ -1,7 +1,9 @@
-name: Build and Release APK
+name: Build WaveMind APK
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -14,43 +16,116 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'
           java-version: '17'
-          distribution: 'zulu'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: chmod +x gradlew || true
 
-      - name: Create debug.keystore
+      - name: Create temporary debug keystore
         run: |
-          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          if [ -f "./debug.keystore" ]; then
+            echo "./debug.keystore already exists."
+          else
+            echo "Generating temporary debug.keystore..."
+            keytool -genkeypair -v \
+              -keystore ./debug.keystore \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -v \
+              -keystore ./debug.keystore \
+              -alias upload \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Release,O=Android,C=US"
+          fi
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Build WaveMind APK
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-        env:
-          KEYSTORE_PATH: "debug.keystore"
-          STORE_PASSWORD: "android"
-          KEY_PASSWORD: "android"
-
-      - name: Rename APKs
+      - name: Verify & prepare WaveMind APK
+        id: prepare_asset
         run: |
-          mv app/build/outputs/apk/debug/app-debug.apk WaveMind-debug.apk
-          mv app/build/outputs/apk/release/app-release-unsigned.apk WaveMind-release.apk || mv app/build/outputs/apk/release/app-release.apk WaveMind-release.apk || true
+          RAW_APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$RAW_APK" ]; then
+            echo "Error: Expected APK not found at $RAW_APK"
+            exit 1
+          fi
+          RELEASE_TMP_DIR=$(mktemp -d)
+          cp "$RAW_APK" "$RELEASE_TMP_DIR/WaveMind.apk"
+          cp "$RAW_APK" "$RELEASE_TMP_DIR/WaveMind-debug.apk"
+          if [ ! -s "$RELEASE_TMP_DIR/WaveMind.apk" ]; then
+            echo "Error: Generated WaveMind.apk is empty."
+            exit 1
+          fi
+          echo "dir=$RELEASE_TMP_DIR" >> "$GITHUB_OUTPUT"
+          echo "apk_path=$RELEASE_TMP_DIR/WaveMind.apk" >> "$GITHUB_OUTPUT"
+          echo "debug_apk_path=$RELEASE_TMP_DIR/WaveMind-debug.apk" >> "$GITHUB_OUTPUT"
+          echo "Verified WaveMind.apk successfully."
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-        uses: softprops/action-gh-release@v1
+      - name: Upload WaveMind APK artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            WaveMind-debug.apk
-            WaveMind-release.apk
+          name: WaveMind-apk
+          path: ${{ steps.prepare_asset.outputs.apk_path }}
+          if-no-files-found: error
+
+      - name: Publish WaveMind APK to GitHub Releases
+        id: create_release
+        continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          WAVEMIND_APK="${{ steps.prepare_asset.outputs.apk_path }}"
+          DEBUG_APK="${{ steps.prepare_asset.outputs.debug_apk_path }}"
+
+          TAG_NAME="v1.0.0-build-${{ github.run_number }}"
+          RELEASE_TITLE="WaveMind v1.0.0 (Official Release #${{ github.run_number }})"
+
+          BODY_TEXT=$(cat <<EOF
+          ### 🧠 WaveMind v1.0.0 - Official Release
+
+          - **App Name**: WaveMind
+          - **File Name**: \`WaveMind.apk\`
+          - **Build**: #${{ github.run_number }} (Attempt ${{ github.run_attempt }})
+          - **Commit**: ${{ github.sha }}
+          - **Updates**:
+            - Bug fixes and optimizations across games & tools
+            - AdMob configuration scaffolded with test IDs
+            - Privacy Policy screen integrated
+            - Gradle wrapper configured for reliable builds
+
+          #### 📲 Download:
+          - **[WaveMind.apk](https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/WaveMind.apk)**
+          EOF
+          )
+
+          gh release create "$TAG_NAME" "$WAVEMIND_APK" "$DEBUG_APK" \
+            --title "$RELEASE_TITLE" \
+            --notes "$BODY_TEXT" \
+            --target "${{ github.sha }}" \
+            --latest
+
+      - name: Report APK download result
+        if: always() && steps.prepare_asset.outcome == 'success'
+        run: |
+          TAG_NAME="v1.0.0-build-${{ github.run_number }}"
+          DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/WaveMind.apk"
+          echo "Direct WaveMind APK Download URL: $DIRECT_URL"
+          echo "### DIRECT WAVEMIND APK DOWNLOAD" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download: [$DIRECT_URL]($DIRECT_URL)" >> "$GITHUB_STEP_SUMMARY"

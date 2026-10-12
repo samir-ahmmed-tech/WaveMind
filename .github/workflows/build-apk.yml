@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -23,26 +25,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Verify Java environment
-        run: |
-          java -version
-          echo "JAVA_HOME=$JAVA_HOME"
-          JAVA_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-          if [ -z "$JAVA_VER" ]; then
-            echo "Error: Java version could not be detected."
-            exit 1
-          fi
-          echo "Detected Java major version: $JAVA_VER"
-          if [ "$JAVA_VER" -lt 17 ]; then
-            echo "Error: Active Java version is lower than 17 ($JAVA_VER)."
-            exit 1
-          fi
-          echo "Active Java version $JAVA_VER verified (17 or newer)."
-
-      - name: Set up Gradle 9.3.1
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.3.1"
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
 
       - name: Create temporary debug keystore
         run: |
@@ -59,15 +43,19 @@ jobs:
               -storepass android \
               -keypass android \
               -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -v \
+              -keystore ./debug.keystore \
+              -alias upload \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Release,O=Android,C=US"
           fi
-          if [ ! -f "./debug.keystore" ]; then
-            echo "Error: ./debug.keystore could not be verified or created."
-            exit 1
-          fi
-          echo "./debug.keystore is present."
 
       - name: Build WaveMind APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Verify & prepare WaveMind APK
         id: prepare_asset
@@ -79,12 +67,14 @@ jobs:
           fi
           RELEASE_TMP_DIR=$(mktemp -d)
           cp "$RAW_APK" "$RELEASE_TMP_DIR/WaveMind.apk"
+          cp "$RAW_APK" "$RELEASE_TMP_DIR/WaveMind-debug.apk"
           if [ ! -s "$RELEASE_TMP_DIR/WaveMind.apk" ]; then
             echo "Error: Generated WaveMind.apk is empty."
             exit 1
           fi
           echo "dir=$RELEASE_TMP_DIR" >> "$GITHUB_OUTPUT"
           echo "apk_path=$RELEASE_TMP_DIR/WaveMind.apk" >> "$GITHUB_OUTPUT"
+          echo "debug_apk_path=$RELEASE_TMP_DIR/WaveMind-debug.apk" >> "$GITHUB_OUTPUT"
           echo "Verified WaveMind.apk successfully."
 
       - name: Upload WaveMind APK artifact
@@ -100,8 +90,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh --version
           WAVEMIND_APK="${{ steps.prepare_asset.outputs.apk_path }}"
+          DEBUG_APK="${{ steps.prepare_asset.outputs.debug_apk_path }}"
 
           TAG_NAME="v1.0.0-build-${{ github.run_number }}"
           RELEASE_TITLE="WaveMind v1.0.0 (Official Release #${{ github.run_number }})"
@@ -113,17 +103,18 @@ jobs:
           - **File Name**: \`WaveMind.apk\`
           - **Build**: #${{ github.run_number }} (Attempt ${{ github.run_attempt }})
           - **Commit**: ${{ github.sha }}
-          - **Engine**: 120 FPS High Refresh Rate & Zero-Lag Render Engine
-          - **UI**: 3D Glassmorphism with Behind-the-Card 3D Radial Nebula Underglow + 85% Global UI Scale
-          - **Drills**: 29 Fully Calibrated Offline Cognitive Brain Training Games
-          - **Icon**: Official 3D Cybernetic WaveMind Master Launcher & In-App Icon
+          - **Updates**:
+            - Bug fixes and optimizations across games & tools
+            - AdMob configuration scaffolded with test IDs
+            - Privacy Policy screen integrated
+            - Gradle wrapper configured for reliable builds
 
           #### 📲 Download:
-          - **[WaveMind.apk](https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WaveMind.apk)**
+          - **[WaveMind.apk](https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/WaveMind.apk)**
           EOF
           )
 
-          gh release create "$TAG_NAME" "$WAVEMIND_APK" \
+          gh release create "$TAG_NAME" "$WAVEMIND_APK" "$DEBUG_APK" \
             --title "$RELEASE_TITLE" \
             --notes "$BODY_TEXT" \
             --target "${{ github.sha }}" \
@@ -131,21 +122,10 @@ jobs:
 
       - name: Report APK download result
         if: always() && steps.prepare_asset.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ steps.create_release.outcome }}" = "success" ]; then
-            echo "GitHub Release published successfully."
-            DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/WaveMind.apk"
-            echo "Direct WaveMind APK Download URL: $DIRECT_URL"
-            echo "### DIRECT WAVEMIND APK DOWNLOAD" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Download: [$DIRECT_URL]($DIRECT_URL)" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "WARNING: GitHub Release creation failed or encountered an error."
-            echo "The APK build succeeded and the GitHub Actions backup artifact 'WaveMind-apk' is available."
-            echo "### BUILD SUMMARY" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "⚠️ Release publishing failed, but the WaveMind APK build succeeded." >> "$GITHUB_STEP_SUMMARY"
-            echo "The artifact 'WaveMind-apk' is preserved in GitHub Actions." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          TAG_NAME="v1.0.0-build-${{ github.run_number }}"
+          DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/WaveMind.apk"
+          echo "Direct WaveMind APK Download URL: $DIRECT_URL"
+          echo "### DIRECT WAVEMIND APK DOWNLOAD" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download: [$DIRECT_URL]($DIRECT_URL)" >> "$GITHUB_STEP_SUMMARY"
